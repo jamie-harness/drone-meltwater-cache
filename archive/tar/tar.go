@@ -11,8 +11,6 @@ import (
 	"strings"
 
 	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
-
 	"github.com/meltwater/drone-cache/internal"
 )
 
@@ -209,7 +207,7 @@ func (a *Archive) Extract(dst string, r io.Reader) (int64, error) {
 			target = filepath.Join(dst, name)
 		}
 
-		level.Debug(a.logger).Log("msg", "extracting archive", "path", target)
+		//level.Info(a.logger).Log("msg", "extracting archive", "path", target)
 
 		if err := os.MkdirAll(filepath.Dir(target), defaultDirPermission); err != nil {
 			return 0, fmt.Errorf("ensure directory <%s>, %w", target, err)
