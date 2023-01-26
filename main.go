@@ -19,6 +19,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/urfave/cli/v2"
 )
 
 // nolint:gochecknoglobals // Used for dynamically adding metadata to binary.
