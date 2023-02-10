@@ -96,9 +96,9 @@ func (p *Plugin) Exec() error { // nolint:funlen
 				return fmt.Errorf("autodetect enabled but failed to detect, falling back to default, %w", err)
 			}
 			if len(buildTools) > 0 {
-				p.logger.Log("msg", "build tools detected: "+strings.Join(buildTools, ", "))
+				p.logger.Log("msg", "build tools detected: "+strings.Join(buildTools, ", ")) //nolint: errcheck
 			} else {
-				p.logger.Log("msg", "no supported build tool detected")
+				p.logger.Log("msg", "no supported build tool detected") //nolint: errcheck
 			}
 			if len(p.Config.Mount) == 0 {
 				p.Config.Mount = dirs
@@ -116,14 +116,12 @@ func (p *Plugin) Exec() error { // nolint:funlen
 			options = append(options, cache.WithFallbackGenerator(keygen.NewHash(cfg.AccountID+p.Metadata.Commit.Branch)))
 		}
 	case cfg.CacheKeyTemplate != "":
-		{
-			generator = keygen.NewMetadata(p.logger, cfg.CacheKeyTemplate, p.Metadata)
-			if err := generator.Check(); err != nil {
-				return fmt.Errorf("parse failed, falling back to default, %w", err)
-			}
-
-			options = append(options, cache.WithFallbackGenerator(keygen.NewHash(p.Metadata.Commit.Branch)))
+		generator = keygen.NewMetadata(p.logger, cfg.CacheKeyTemplate, p.Metadata)
+		if err := generator.Check(); err != nil {
+			return fmt.Errorf("parse failed, falling back to default, %w", err)
 		}
+
+		options = append(options, cache.WithFallbackGenerator(keygen.NewHash(p.Metadata.Commit.Branch)))
 	default:
 		{
 			generator = keygen.NewHash(p.Metadata.Commit.Branch)
