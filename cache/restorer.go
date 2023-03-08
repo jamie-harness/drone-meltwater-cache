@@ -126,6 +126,8 @@ func (r restorer) restore(src, dst string) (err error) {
 		return err
 	}
 
+	level.Info(r.logger).Log("msg", "cache size", "total", written)
+
 	level.Debug(r.logger).Log(
 		"msg", "archive extracted",
 		"local", dst,

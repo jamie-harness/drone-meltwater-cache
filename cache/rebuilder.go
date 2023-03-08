@@ -27,13 +27,14 @@ type rebuilder struct {
 	g  key.Generator
 	fg key.Generator
 
-	namespace string
-	override  bool
+	namespace      string
+	override       bool
+	gracefulDetect bool
 }
 
 // NewRebuilder creates a new cache.Rebuilder.
-func NewRebuilder(logger log.Logger, s storage.Storage, a archive.Archive, g key.Generator, fg key.Generator, namespace string, override bool) Rebuilder { // nolint:lll
-	return rebuilder{logger, a, s, g, fg, namespace, override}
+func NewRebuilder(logger log.Logger, s storage.Storage, a archive.Archive, g key.Generator, fg key.Generator, namespace string, override bool, gracefulDetect bool) Rebuilder { // nolint:lll
+	return rebuilder{logger, a, s, g, fg, namespace, override, gracefulDetect}
 }
 
 // Rebuild rebuilds cache from the files provided with given paths.
@@ -55,7 +56,10 @@ func (r rebuilder) Rebuild(srcs []string) error {
 
 	for _, src := range srcs {
 		if _, err := os.Lstat(src); err != nil {
-			return fmt.Errorf("source <%s>, make sure file or directory exists and readable, %w", src, err)
+			if !r.gracefulDetect {
+				return fmt.Errorf("source <%s>, make sure file or directory exists and readable, %w", src, err)
+			}
+			level.Warn(r.logger).Log("msg", fmt.Sprintf("source directory %s does not exist", src), "err", fmt.Errorf("source <%s>, make sure file or directory exists and readable, %w", src, err))
 		}
 
 		dst := filepath.Join(namespace, key, src)
@@ -142,6 +146,8 @@ func (r rebuilder) rebuild(src, dst string) (err error) {
 
 		return err
 	}
+
+	level.Info(r.logger).Log("msg", "cache size", "total", humanize.Bytes(uint64(sw.written)), "comressed", humanize.Bytes(uint64(written)))
 
 	level.Debug(r.logger).Log(
 		"msg", "archive created",
