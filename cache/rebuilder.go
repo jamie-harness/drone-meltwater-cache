@@ -76,7 +76,8 @@ func (r rebuilder) Rebuild(srcs []string) error {
 			}
 		}
 
-		level.Info(r.logger).Log("msg", "rebuilding cache for directory", "local", src, "remote", dst)
+		level.Info(r.logger).Log("msg", "rebuilding cache for directory", "local", src)
+		level.Debug(r.logger).Log("msg", "rebuilding cache for directory", "remote", dst)
 
 		wg.Add(1)
 
@@ -103,14 +104,14 @@ func (r rebuilder) Rebuild(srcs []string) error {
 // rebuild pushes the archived file to the cache.
 func (r rebuilder) rebuild(src, dst string) (err error) {
 	isRelativePath := strings.HasPrefix(src, "./")
-	level.Info(r.logger).Log("msg", "rebuild", "src", src, "relativePath", isRelativePath) //nolint: errcheck
+	level.Debug(r.logger).Log("msg", "rebuild", "src", src, "relativePath", isRelativePath) //nolint: errcheck
 	src = filepath.Clean(src)
 	if !isRelativePath {
 		src, err = filepath.Abs(src)
 		if err != nil {
 			return fmt.Errorf("clean source path, %w", err)
 		}
-		level.Info(r.logger).Log("msg", "src is adjusted", "src", src) //nolint: errcheck
+		level.Debug(r.logger).Log("msg", "src is adjusted", "src", src) //nolint: errcheck
 	}
 
 	pr, pw := io.Pipe()
@@ -121,7 +122,7 @@ func (r rebuilder) rebuild(src, dst string) (err error) {
 	go func(wrt *int64) {
 		defer internal.CloseWithErrLogf(r.logger, pw, "pw close defer")
 
-		level.Info(r.logger).Log("msg", "caching paths", "src", src)
+		level.Debug(r.logger).Log("msg", "caching paths", "src", src)
 
 		localWritten, err := r.a.Create([]string{src}, pw, isRelativePath)
 		if err != nil {
@@ -133,7 +134,7 @@ func (r rebuilder) rebuild(src, dst string) (err error) {
 		*wrt += localWritten
 	}(&written)
 
-	level.Info(r.logger).Log("msg", "uploading archived directory", "local", src, "remote", dst)
+	level.Debug(r.logger).Log("msg", "uploading archived directory", "local", src, "remote", dst)
 
 	sw := &statWriter{}
 	tr := io.TeeReader(pr, sw)
@@ -147,7 +148,7 @@ func (r rebuilder) rebuild(src, dst string) (err error) {
 		return err
 	}
 
-	level.Info(r.logger).Log("msg", "cache size", "total", humanize.Bytes(uint64(sw.written)), "comressed", humanize.Bytes(uint64(written)))
+	level.Info(r.logger).Log("msg", "uploaded cache", "src", src, "total", humanize.Bytes(uint64(sw.written)), "comressed", humanize.Bytes(uint64(written)))
 
 	level.Debug(r.logger).Log(
 		"msg", "archive created",

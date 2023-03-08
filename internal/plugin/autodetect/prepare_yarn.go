@@ -57,4 +57,6 @@ func prepareYarn(pathToCache string, fileToWrite string, contentToWrite string) 
 	if err != nil {
 		return err
 	}
+
+	return nil
 }
