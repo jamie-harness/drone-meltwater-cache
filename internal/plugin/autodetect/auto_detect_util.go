@@ -55,7 +55,16 @@ func DetectDirectoriesToCache(skipPrepare bool) ([]string, []string, string, err
 	var hashes string
 
 	for _, supportedTool := range buildToolInfoMapping {
-		hash, dir, err := hashIfFileExist(filepath.Join("**", supportedTool.globToDetect))
+		hash, dir, err := hashIfFileExist(supportedTool.globToDetect)
+		if err != nil {
+			return nil, nil, "", err
+		}
+		if hash == "" {
+			hash, dir, err = hashIfFileExist(filepath.Join("**", supportedTool.globToDetect))
+			if err != nil {
+				return nil, nil, "", err
+			}
+		}
 		if err != nil {
 			return nil, nil, "", err
 		}
