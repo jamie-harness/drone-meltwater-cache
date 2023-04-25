@@ -83,8 +83,7 @@ func TestDetectDirectoriesToCacheBazel(t *testing.T) {
 	test.Ok(t, os.RemoveAll(bazelBuildFile))
 	test.Ok(t, err)
 
-	path, _ := filepath.Abs(toolGradleDir)
-	expectedCacheDir := []string{path}
+	expectedCacheDir := []string{toolGradleDir}
 	expectedDetectedTool := []string{toolGradle}
 
 	test.Equals(t, directoriesToCache, expectedCacheDir)
@@ -115,8 +114,7 @@ func TestDetectDirectoriesToCacheCombined(t *testing.T) {
 	test.Ok(t, err)
 
 	path1, _ := filepath.Abs(toolMavenDir)
-	path2, _ := filepath.Abs(toolGradleDir)
-	expectedCacheDir := []string{path1, path2}
+	expectedCacheDir := []string{path1, toolGradleDir}
 	expectedDetectedTool := []string{toolMaven, toolGradle}
 
 	test.Equals(t, directoriesToCache, expectedCacheDir)
