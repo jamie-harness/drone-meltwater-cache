@@ -422,7 +422,7 @@ func main() {
 		&cli.StringFlag{
 			Name:   "external-id",
 			Usage:  "external ID to use when assuming role",
-			EnvVar: "PLUGIN_EXTERNAL_ID",
+			EnvVars: []string{"PLUGIN_EXTERNAL_ID"},
 		},
 
 		// GCS specific Configs flags
